@@ -17,8 +17,20 @@ const itemSchema = Joi.object({
   name: Joi.string().min(1).required(),
 });
 
+/// Get all items with pagination
 app.get("/items", (req, res) => {
-  res.json(items);
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+
+  const paginatedItems = items.slice(startIndex, endIndex);
+  res.json({
+    totalItems: items.length,
+    totalPages: Math.ceil(items.length / limit),
+    currentPage: page,
+    items: paginatedItems,
+  });
 });
 
 // Add new item with validation
