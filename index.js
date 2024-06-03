@@ -27,9 +27,12 @@ app.post("/items", (req, res) => {
   if (error) {
     return res.status(400).send(error.details[0].message);
   }
-  const newItem = req.body;
-  items.push(newItem);
-  res.status(201).json(newItem);
+  const itemExists = items.some((item) => item.id === value.id);
+  if (itemExists) {
+    return res.status(409).send("Item with the given ID already exists.");
+  }
+  items.push(value);
+  res.status(201).json(value);
 });
 
 // API to retrieve Items, by an id
@@ -65,10 +68,9 @@ app.delete("/items/:id", (req, res) => {
   const itemIndex = items.findIndex((i) => i.id === id);
   items = items.filter((i) => i.id !== id);
   if (itemIndex === -1) {
-    res.status(404).send(`Item ID: ${id} not found`);
-  } else {
-    res.status(204).send();
+    return res.status(404).send(`Item ID: ${id} not found`);
   }
+  res.status(204).send();
 });
 
 // Error Handling
