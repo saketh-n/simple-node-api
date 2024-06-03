@@ -1,5 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger.json");
 const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 3000;
@@ -74,6 +76,9 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send("Something broke!");
 });
+
+// Serve Swagger docs
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
