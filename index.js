@@ -17,16 +17,21 @@ const itemSchema = Joi.object({
   name: Joi.string().min(1).required(),
 });
 
-// Get all items with pagination and sorting
+// Get all items with pagination, sorting, and search
 app.get("/items", (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
   const sortField = req.query.sortField || "id";
   const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
+  const searchTerm = req.query.search || "";
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
 
-  const sortedItems = [...items].sort((a, b) => {
+  let filteredItems = items.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const sortedItems = filteredItems.sort((a, b) => {
     if (a[sortField] < b[sortField]) return -1 * sortOrder;
     if (a[sortField] > b[sortField]) return 1 * sortOrder;
     return 0;
@@ -34,8 +39,8 @@ app.get("/items", (req, res) => {
 
   const paginatedItems = sortedItems.slice(startIndex, endIndex);
   res.json({
-    totalItems: items.length,
-    totalPages: Math.ceil(items.length / limit),
+    totalItems: filteredItems.length,
+    totalPages: Math.ceil(filteredItems.length / limit),
     currentPage: page,
     items: paginatedItems,
   });
