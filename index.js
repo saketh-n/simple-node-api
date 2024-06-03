@@ -2,11 +2,22 @@ const express = require("express");
 const Joi = require("joi");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./swagger.json");
+const rateLimit = require("express-rate-limit");
+
 const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+
+// Apply rate limiting to all requests
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many requests, please try again later.",
+});
+
+app.use(limiter);
 
 // Create an in-memory data store and allow us to add items via api
 let items = [];
